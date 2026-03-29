@@ -25,5 +25,5 @@ brew upgrade anima
 ## Links
 
 - [Anima CLI](https://github.com/anima-labs-ai/cli)
-- [Documentation](https://docs.anima.email)
-- [Anima Platform](https://anima.email)
+- [Documentation](https://docs.useanima.sh)
+- [Anima Platform](https://useanima.sh)
