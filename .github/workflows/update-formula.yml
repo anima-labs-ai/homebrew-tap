@@ -36,7 +36,11 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      # Full history: the checkout doubles as the local tap during
+      # validation, and Homebrew refuses to work with shallow tap clones.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -96,12 +100,22 @@ jobs:
         if: steps.version.outputs.version != steps.version.outputs.current
         env:
           VERSION: ${{ steps.version.outputs.version }}
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
         run: |
           if ! command -v brew >/dev/null 2>&1; then
             eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           fi
-          brew install --formula ./Formula/anima.rb
-          installed="$(anima --version || "$(brew --prefix)/bin/anima" --version)"
+          # Homebrew refuses to install formula files by path — formulae must
+          # live in a tap. Register THIS checkout (with the just-regenerated
+          # formula) as the tap by symlinking it into brew's taps dir; a
+          # network `brew tap` would clone the old formula from GitHub and
+          # defeat pre-push validation.
+          tap_dir="$(brew --repository)/Library/Taps/anima-labs-ai/homebrew-tap"
+          mkdir -p "$(dirname "$tap_dir")"
+          ln -sfn "$GITHUB_WORKSPACE" "$tap_dir"
+          brew install anima-labs-ai/tap/anima
+          installed="$("$(brew --prefix)/bin/anima" --version)"
           echo "anima --version -> $installed"
           if [ "$installed" != "$VERSION" ]; then
             echo "::error::Installed version '$installed' does not match expected '$VERSION'"
