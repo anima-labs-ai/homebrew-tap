@@ -4,8 +4,8 @@
 class Anima < Formula
   desc "Official CLI for the Anima platform — identity infrastructure for AI agents"
   homepage "https://useanima.sh"
-  url "https://registry.npmjs.org/@anima-labs/cli/-/cli-0.6.7.tgz"
-  sha256 "85fea85c58350b126ffc9ca14e86d294c70e37f292b67f3883a362d5b55b95b8"
+  url "https://registry.npmjs.org/@anima-labs/cli/-/cli-0.6.8.tgz"
+  sha256 "b732c38e07cc44b4d41ef0958d393e7879a41543b08616b6c64d036d8b640660"
   license "MIT"
 
   depends_on "node"
