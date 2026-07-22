@@ -34,7 +34,7 @@ concurrency:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       # Full history: the checkout doubles as the local tap during
       # validation, and Homebrew refuses to work with shallow tap clones.
