@@ -106,6 +106,28 @@ jobs:
           if ! command -v brew >/dev/null 2>&1; then
             eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           fi
+          # The Blacksmith image ships the Homebrew prefix owned by another
+          # user, so every write brew needs — the taps dir, the Cellar, the
+          # linked opt/bin — fails with "not writable by your user". The
+          # GitHub-hosted image gave the runner ownership, which is why this
+          # step worked until the 2026-07-22 migration. The break then stayed
+          # invisible for thirteen days because the step only runs when npm
+          # has a version the formula lacks, so the tap sat on 0.6.9 while npm
+          # moved to 0.9.0. Take the prefix over once, exactly as brew's own
+          # error message advises, rather than depending on either image's
+          # ownership.
+          if [ ! -w "$(brew --repository)" ]; then
+            echo "Homebrew prefix not writable by $(id -un) — taking ownership."
+            sudo chown -R "$(id -u):$(id -g)" "$(brew --prefix)"
+          fi
+          # That image also ships a stale Homebrew, and stale Homebrew cannot
+          # read current bottles: pouring ca-certificates died in
+          # Utils::Bottles.load_tab with "undefined method '[]' for nil", and
+          # brew's own advice was "you have not updated today — run brew
+          # update and try again". HOMEBREW_NO_AUTO_UPDATE (set below, for
+          # speed) suppresses the implicit update that would have healed this,
+          # so do it once, explicitly, before the install.
+          brew update --quiet
           # Homebrew refuses to install formula files by path — formulae must
           # live in a tap. Register THIS checkout (with the just-regenerated
           # formula) as the tap by symlinking it into brew's taps dir; a
